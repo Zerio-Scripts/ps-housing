@@ -911,26 +911,36 @@ RegisterNetEvent("ps-housing:server:addAccess", function(property_id, srcToAdd)
 end)
 
 
-RegisterNetEvent("ps-housing:server:qbxRegisterHouse", function(property_id)
+RegisterNetEvent("ps-housing:server:openHousingGarage", function(property_id)
+    local src = source
     local property = Property.Get(property_id)
     if not property then return end
 
-    local propertyData = property.propertyData
-    local label = propertyData.street .. property.property_id .. " Garage"
-    local garageData = propertyData.garage_data
-    local coords = vec4(garageData.x, garageData.y, garageData.z, garageData.h)
+    local citizenid = GetCitizenid(src, src)
+    if not property:CheckForAccess(citizenid) then return end
 
-    exports.qbx_garages:RegisterGarage('housegarage-'..property_id, {
-        label = label,
-        vehicleType = 'car',
-        groups = propertyData.owner,
-        accessPoints = {
-            {
-                coords = coords,
-                spawn = coords,
-            }
-        },
-    })
+    local propertyData = property.propertyData
+    local garageData = propertyData.garage_data
+    if not garageData or not garageData.x then return end
+
+    local label = propertyData.street .. " " .. property.property_id .. " Garage"
+    local spawns = vec4(garageData.x, garageData.y, garageData.z, garageData.h)
+
+    exports['zerio-garage']:OpenHousingGarage(src, label, spawns)
+end)
+
+RegisterNetEvent("ps-housing:server:storeHousingVehicle", function(property_id)
+    local src = source
+    local property = Property.Get(property_id)
+    if not property then return end
+
+    local citizenid = GetCitizenid(src, src)
+    if not property:CheckForAccess(citizenid) then return end
+
+    local propertyData = property.propertyData
+    local label = propertyData.street .. " " .. property.property_id .. " Garage"
+
+    exports['zerio-garage']:StoreHousingVehicle(src, label)
 end)
 
 RegisterNetEvent("ps-housing:server:removeAccess", function(property_id, citizenidToRemove)

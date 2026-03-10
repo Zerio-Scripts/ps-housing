@@ -263,42 +263,32 @@ function Property:RegisterGarageZone()
     end
 
     local garageData = self.propertyData.garage_data
-    local label = self.propertyData.street .. self.property_id .. " Garage"
-
-    local isQbx = GetResourceState('qbx_garages') == 'started'
     local coords = vec4(garageData.x, garageData.y, garageData.z, garageData.h)
+    local property_id = self.property_id
 
-    if isQbx then
-        TriggerServerEvent('ps-housing:server:qbxRegisterHouse', self.property_id)
-    else
-        TriggerEvent("qb-garages:client:addHouseGarage", self.property_id, {
-            takeVehicle = {
-                x = garageData.x,
-                y = garageData.y,
-                z = garageData.z,
-                w = garageData.h
-            },
-            type = "house",
-            label = label,
-        })
-    end
-    if not isQbx then
-        self.garageZone = lib.zones.box({
-            coords = coords.xyz,
-            size = vector3(garageData.length + 5.0, garageData.width + 5.0, 3.5),
-            rotation = coords.w,
-            debug = Config.DebugMode,
-            onEnter = function()
-                TriggerEvent('qb-garages:client:setHouseGarage', self.property_id, true)
-            end,
-        })
-    end
+    self.garageZone = lib.zones.box({
+        coords = coords.xyz,
+        size = vector3(garageData.length + 5.0, garageData.width + 5.0, 3.5),
+        rotation = coords.w,
+        debug = Config.DebugMode,
+        onEnter = function()
+            lib.showTextUI('[E] Open Garage | [G] Store Vehicle')
+        end,
+        onExit = function()
+            lib.hideTextUI()
+        end,
+        inside = function()
+            if IsControlJustPressed(0, 38) then -- E
+                TriggerServerEvent('ps-housing:server:openHousingGarage', property_id)
+            elseif IsControlJustPressed(0, 47) then -- G
+                TriggerServerEvent('ps-housing:server:storeHousingVehicle', property_id)
+            end
+        end,
+    })
 end
 
 function Property:UnregisterGarageZone()
     if not self.garageZone then return end
-
-    TriggerEvent("qb-garages:client:removeHouseGarage", self.property_id)
 
     self.garageZone:remove()
     self.garageZone = nil
