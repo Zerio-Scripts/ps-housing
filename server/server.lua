@@ -66,6 +66,7 @@ lib.callback.register("ps-housing:server:requestProperties", function()
 end)
 
 function RegisterProperty(propertyData, preventEnter, source)
+    print("RegisterProperty", propertyData, preventEnter, source)
     propertyData.owner = propertyData.owner or nil
     propertyData.has_access = propertyData.has_access or {}
     propertyData.extra_imgs = propertyData.extra_imgs or {}
@@ -434,6 +435,39 @@ exports('IsOwner', function(src, property_id)
 
     local citizenid = GetCitizenid(src, src)
     return property:CheckForAccess(citizenid)
+end)
+
+--- Get a property by its ID
+--- @param property_id string - The property ID
+--- @return table|nil - Property object or nil if not found
+exports('GetProperty', function(property_id)
+    return Property.Get(property_id)
+end)
+
+--- Get player properties with garage access
+--- @param citizenid string - Player's citizenid
+--- @return table - Array of property objects with garage data
+exports('getPlayerPropertyGarages', function(citizenid)
+    local playerProperties = {}
+    
+    for property_id, property in pairs(PropertiesTable) do
+        -- Check if player has access to this property
+        if property:CheckForAccess(citizenid) then
+            local propertyData = property.propertyData
+            local garageData = propertyData.garage_data
+            
+            -- Only include properties that have a garage configured
+            if garageData and garageData.x then
+                table.insert(playerProperties, {
+                    property_id = property.property_id,
+                    street = propertyData.street or "Unknown",
+                    garage_data = garageData
+                })
+            end
+        end
+    end
+    
+    return playerProperties
 end)
 
 function GetCitizenid(targetSrc, callerSrc)

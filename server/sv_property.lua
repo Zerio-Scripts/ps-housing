@@ -926,7 +926,7 @@ RegisterNetEvent("ps-housing:server:openHousingGarage", function(property_id)
     local label = propertyData.street .. " " .. property.property_id .. " Garage"
     local spawns = vec4(garageData.x, garageData.y, garageData.z, garageData.h)
 
-    exports['zerio-garage']:OpenHousingGarage(src, label, spawns)
+    exports['zerio-garage']:OpenHousingGarage(src, "ps_housing_" .. property.property_id, label, spawns)
 end)
 
 RegisterNetEvent("ps-housing:server:storeHousingVehicle", function(property_id)
@@ -940,7 +940,7 @@ RegisterNetEvent("ps-housing:server:storeHousingVehicle", function(property_id)
     local propertyData = property.propertyData
     local label = propertyData.street .. " " .. property.property_id .. " Garage"
 
-    exports['zerio-garage']:StoreHousingVehicle(src, label)
+    exports['zerio-garage']:StoreHousingVehicle(src, "ps_housing_" .. property.property_id, label)
 end)
 
 RegisterNetEvent("ps-housing:server:removeAccess", function(property_id, citizenidToRemove)
